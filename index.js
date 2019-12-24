@@ -28,15 +28,8 @@ exports.handler = (event, context, callback) => {
                 let limit = 14*24*60*60*1000;
                 let query = 14;
                 if (event.queryStringParameters && event.queryStringParameters.limit) {
-                    const qspLimit = parseInt(event.queryStringParameters.limit);
-                    limit = qspLimit*24*60*60*1000;
-                    if (qspLimit === 7) {
-                        query = 7;
-                    } else if (qspLimit === 14) {
-                        query = 14;
-                    } else if (qspLimit === 30) {
-                        query = 30;
-                    }
+                    query = parseInt(event.queryStringParameters.limit);
+                    limit = query*24*60*60*1000;
                 }
                 let starred = false;
                 if (event.queryStringParameters && event.queryStringParameters.starred) {
@@ -53,7 +46,8 @@ exports.handler = (event, context, callback) => {
                             continue;
                         }
                         latentContacts += `<tr>
-                            <td>${contact.first_name}&nbsp;${contact.last_name}</td>
+                            <td>${contact.first_name}&nbsp;${contact.last_name}
+                                ${contact.is_starred ? '&#11088;' : ''}</td>
                             <td>${lastActivityTogether.toDateString()}</td>
                             <td>${lastCalled.toDateString()}</td>
                         </tr>`;
@@ -65,6 +59,7 @@ exports.handler = (event, context, callback) => {
                         <html>
                         <head>
                             <title>Sebastian's Monica Dashboard</title>
+                            <meta charset="utf-8">
                             <meta name="viewport" content="width=device-width, initial-scale=1">
                             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
                         </head>
@@ -74,6 +69,8 @@ exports.handler = (event, context, callback) => {
                                     <option value="7" ${(query === 7) ? 'selected' : ''}>7 days</option>
                                     <option value="14" ${(query === 14) ? 'selected' : ''}>14 days</option>
                                     <option value="30" ${(query === 30) ? 'selected' : ''}>30 days</option>
+                                    <option value="60" ${(query === 60) ? 'selected' : ''}>60 days</option>
+                                    <option value="90" ${(query === 90) ? 'selected' : ''}>90 days</option>
                                 </select>
                                 <div style="padding-top: 10px;">
                                     <input type="checkbox" id="starred" onclick="refresh()" ${(starred) ? 'checked' : ''}>
