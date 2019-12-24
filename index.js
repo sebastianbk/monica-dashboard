@@ -26,14 +26,32 @@ exports.handler = (event, context, callback) => {
                 // Find latent contacts
                 const now = (new Date()).getTime();
                 let limit = 14*24*60*60*1000;
+                let query = 14;
                 if (event.queryStringParameters && event.queryStringParameters.limit) {
-                    limit = event.queryStringParameters.limit*24*60*60*1000;
+                    const qspLimit = parseInt(event.queryStringParameters.limit);
+                    limit = qspLimit*24*60*60*1000;
+                    if (qspLimit === 7) {
+                        query = 7;
+                    } else if (qspLimit === 14) {
+                        query = 14;
+                    } else if (qspLimit === 30) {
+                        query = 30;
+                    }
+                }
+                let starred = false;
+                if (event.queryStringParameters && event.queryStringParameters.starred) {
+                    if (event.queryStringParameters.starred === 'yes') {
+                        starred = true;
+                    }
                 }
                 let latentContacts = '';
                 for (const contact of contacts) {
                     let lastActivityTogether = new Date(contact.last_activity_together);
                     let lastCalled = new Date(contact.last_called);
                     if ((now - lastActivityTogether.getTime()) > limit && (now - lastCalled.getTime()) > limit) {
+                        if (starred && !contact.is_starred) {
+                            continue;
+                        }
                         latentContacts += `<tr>
                             <td>${contact.first_name}&nbsp;${contact.last_name}</td>
                             <td>${lastActivityTogether.toDateString()}</td>
@@ -51,7 +69,17 @@ exports.handler = (event, context, callback) => {
                             <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
                         </head>
                         <body>
-                            <h1>Latent contacts</h1>
+                            <div style="padding: 10px;">
+                                <select id="limit" class="form-control" onchange="refresh()">
+                                    <option value="7" ${(query === 7) ? 'selected' : ''}>7 days</option>
+                                    <option value="14" ${(query === 14) ? 'selected' : ''}>14 days</option>
+                                    <option value="30" ${(query === 30) ? 'selected' : ''}>30 days</option>
+                                </select>
+                                <div style="padding-top: 10px;">
+                                    <input type="checkbox" id="starred" onclick="refresh()" ${(starred) ? 'checked' : ''}>
+                                    <label for="starred">Starred?</label>
+                                </div>
+                            </div>
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
@@ -64,6 +92,17 @@ exports.handler = (event, context, callback) => {
                                     ${latentContacts}
                                 </tbody>
                             </table>
+                            <script type="text/javascript">
+                                function refresh() {
+                                    var x = document.getElementById("limit").value;
+                                    var y = document.getElementById("starred").checked;
+                                    var loc = window.location.pathname + '?limit=' + x;
+                                    if (y) {
+                                        loc = loc + '&starred=yes';
+                                    }
+                                    window.location.href = loc;
+                                }
+                            </script>
                         </body>
                     </html>`;
                     
