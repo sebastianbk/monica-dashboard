@@ -80,7 +80,6 @@ function createResponse(event, context, callback, contacts) {
                 </script>
             </body>
         </html>`;
-        
     const response = {
           statusCode: 200,
           headers: {
@@ -103,7 +102,8 @@ function getData(event, context, callback, options, contacts) {
             const parsed = JSON.parse(data);
             contacts = contacts.concat(parsed.data);
             if (parsed.links && parsed.links.next != null && parsed.links.next !== '') {
-                options.path = parsed.links.next.replace('https://', '').replace(options.hostname, '');
+                options.path = parsed.links.next.replace('https://', '').replace(options.hostname, '') +
+                    '&limit=100';
                 getData(event, context, callback, options, contacts);
             } else {
                 createResponse(event, context, callback, contacts);
