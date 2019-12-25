@@ -113,29 +113,18 @@ function getData(event, context, callback, options, contacts) {
 }
 
 exports.handler = (event, context, callback) => {
-    try {
-        // Define options for the HTTPS client
-        const options = {
-            hostname: 'app.monicahq.com',
-            path: '/api/contacts?limit=100',
-            headers: {
-                Authorization: `Bearer ${process.env.MONICA_TOKEN}`
-            }
-        };
-        
-        // Create the contacts array
-        let contacts = [];
-        
-        // Start process of getting data and creating the response
-        getData(event, context, callback, options, contacts);
-    } catch (error) {
-        const response = {
-              statusCode: 500,
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(error, Object.getOwnPropertyNames(error))
-        };
-        callback(null, response);
-    }
+    // Define options for the HTTPS client
+    const options = {
+        hostname: 'app.monicahq.com',
+        path: '/api/contacts?limit=100',
+        headers: {
+            Authorization: `Bearer ${process.env.MONICA_TOKEN}`
+        }
+    };
+    
+    // Create the contacts array
+    let contacts = [];
+    
+    // Start process of getting data and creating the response
+    getData(event, context, callback, options, contacts);
 };
